@@ -1,164 +1,195 @@
 # GitHub Insight
 
-深度解读 GitHub 仓库的 Claude Skill，全面分析任意仓库的用途、技术栈和应用领域，提供保姆级本地使用指南。
-
-## 目录
-
-- [简介](#简介)
-- [功能特性](#功能特性)
-- [安装](#安装)
-- [使用](#使用)
-  - [分析指定仓库](#分析指定仓库)
-  - [查找热门仓库](#查找热门仓库)
-- [GPU/CPU 支持](#gpucpu-支持)
-- [项目结构](#项目结构)
-- [配置](#配置)
-- [云端 GPU 替代方案](#云端-gpu-替代方案)
-- [依赖要求](#依赖要求)
-- [常见问题](#常见问题)
-- [License](#license)
+深度解读 GitHub 仓库的 Claude Skill，帮助 Claude 智能体分析任意 GitHub 项目的用途、技术栈和应用领域，并提供保姆级本地运行指南。
 
 ---
 
-## 简介
+## 什么是 GitHub Insight？
 
-GitHub Insight 帮助您深入了解任何 GitHub 仓库。无论您有特定的仓库需要分析，还是正在探索新项目，本工具都能提供全面的分析报告，包括：
+GitHub Insight 是一个专为 **Claude AI 助手** 设计的 Claude Skill。安装后，Claude 能够：
 
-- 仓库概述与核心功能
-- 技术栈与编程语言识别
-- 应用领域分类
-- 本地运行指南
-- GPU/CPU 兼容性评估
-- 社区活跃度分析
-
----
-
-## 功能特性
-
-| 功能 | 描述 |
+| 能力 | 说明 |
 |------|------|
-| **仓库分析** | 解析任意 GitHub 仓库的 README、语言统计和元数据 |
-| **热门推荐** | 根据兴趣领域筛选并推荐热门项目 |
-| **本地指南** | 从零开始的本地安装运行教程 |
-| **硬件检测** | 自动检测 CPU/GPU 环境，提供最优配置方案 |
-| **多平台支持** | Windows、macOS、Linux 全面兼容 |
-| **云端 GPU** | 本地无 GPU 时的云端解决方案 |
+| **深度分析仓库** | 解析任意公开仓库的 README、语言统计、元数据 |
+| **推荐热门项目** | 根据用户兴趣推荐对应领域的优质开源项目 |
+| **生成使用指南** | 提供从零开始的本地安装、配置、运行教程 |
+| **评估项目质量** | 分析仓库活跃度、Issue/PR 活动、社区参与度 |
 
 ---
 
-## 安装
+## Skill 触发条件
 
-### 前置条件
+当用户在对话中出现以下意图时触发：
 
-- Python 3.8 或更高版本
-- Git 已安装
-- （可选）GitHub Personal Access Token 用于提升 API 速率限制
+- 想了解某个 GitHub 仓库（"帮我看看这个项目"、"分析一下 xxx"）
+- 需要推荐热门项目（"推荐些 xxx 相关的项目"、"有什么 xxx 项目"）
+- 询问如何本地运行某个项目（"怎么运行"、"如何安装"）
 
-### 安装步骤
+---
+
+## 安装方法
+
+### 方式一：直接导入 Skill 文件
+
+1. 下载本仓库中的 `github-insight.skill` 文件
+2. 打开 Claude Settings → Claude Skills
+3. 点击 "Import Skill"，选择下载的 `.skill` 文件
+4. 导入成功后即可使用
+
+### 方式二：本地开发
 
 ```bash
 # 克隆仓库
-git clone <仓库地址>
-cd <仓库名称>
+git clone https://github.com/17mc70/github-insight-skill.git
+cd github-insight-skill
 
 # 安装依赖
 pip install -r requirements.txt
 
 # 可选：设置 GitHub Token 提升 API 限制
-# 未认证：60 次/小时 → 认证后：5000 次/小时
-export GITHUB_TOKEN="ghp_xxxxxxxxxxxx"
+export GITHUB_TOKEN="ghp_你的token"
 ```
 
 ---
 
-## 使用
+## 使用示例
 
-### 分析指定仓库
+### 示例 1：分析指定仓库
 
-分析特定的 GitHub 仓库：
+```
+用户：帮我分析一下 langchain-ai/langchain 这个仓库
+```
+
+**Claude 执行流程：**
+1. 调用 `get_github_repo.py langchain-ai/langchain`
+2. 分析返回的仓库数据
+3. 生成深度解读报告，包含：
+   - 项目概述（Stars、描述、更新时间）
+   - 核心功能与用途
+   - 技术栈（Python、主要框架）
+   - 应用领域（AI/LLM 应用开发）
+   - 本地安装指南（GPU/CPU 版本）
+   - 活跃度评估
+
+### 示例 2：推荐热门项目
+
+```
+用户：推荐一些机器学习相关的项目
+```
+
+**Claude 执行流程：**
+1. 询问用户具体兴趣领域
+2. 用户选择 "machine-learning"
+3. 调用 `get_trending_repos.py --language machine-learning --limit 3`
+4. 对返回的 3 个仓库逐个调用 `get_github_repo.py`
+5. 生成 3 个仓库的对比分析报告
+
+### 示例 3：获取本地运行指南
+
+```
+用户：帮我看看这个项目怎么本地运行？
+```
+
+**Claude 执行流程：**
+1. 解析用户输入中的仓库地址
+2. 调用 `get_github_repo.py` 获取仓库信息
+3. 根据项目类型（AI/Web/后端/工具）生成对应指南：
+   - Git 安装
+   - 仓库克隆
+   - 环境配置
+   - 依赖安装
+   - 运行项目
+   - GPU/CPU 适配（AI 项目）
+   - 常见问题
+
+---
+
+## 对话触发方式
+
+| 用户输入 | Claude 响应 |
+|---------|-------------|
+| "分析一下 pytorch/pytorch" | 调用仓库分析脚本 |
+| "推荐几个 Web 开发工具" | 调用热门推荐脚本 |
+| "这个项目怎么运行？" | 生成本地运行指南 |
+| "帮我看看这个仓库" | 触发分析流程 |
+
+---
+
+## Python 脚本说明
+
+### 1. get_github_repo.py
+
+**功能：** 获取 GitHub 仓库的详细信息
 
 ```bash
 python scripts/get_github_repo.py owner/repo
-# 示例：python scripts/get_github_repo.py tensorflow/tensorflow
 ```
 
-**输出内容：**
-- 基本信息（Stars、Forks、描述）
-- 核心用途与功能
-- 技术栈与编程语言
-- 应用领域
-- 本地安装指南（CPU/GPU 版本）
-- 活跃度指标与社区健康度
+**参数：**
+- `owner/repo` - 仓库标识（必需）
 
-### 查找热门仓库
+**返回数据：**
+```
+{
+  "name": "仓库名",
+  "description": "描述",
+  "stars": 12345,
+  "forks": 1234,
+  "language": "Python",
+  "updated_at": "2024-01-01",
+  "readme": "# README 内容...",
+  "topics": ["machine-learning", "ai", ...]
+}
+```
 
-发现特定领域的热门仓库：
+### 2. get_trending_repos.py
+
+**功能：** 获取指定领域的热门仓库列表
 
 ```bash
-python scripts/get_trending_repos.py --language <领域> --limit <数量>
-# 示例：python scripts/get_trending_repos.py --language machine-learning --limit 3
+python scripts/get_trending_repos.py --language python --limit 3
 ```
 
+**参数：**
+- `--language` - 领域关键词（必需）
+- `--limit` - 返回数量（默认 3）
+
 **支持的领域：**
-- LLM / 大语言模型
-- AI / 机器学习
-- Python 开发
-- JavaScript / Web 开发
-- 开发工具
-- 设计 / UI
-- 移动开发
+```
+machine-learning, deep-learning, large-language-model,
+javascript, typescript, python, java, go, rust,
+web, frontend, backend, devops, tools, cli,
+data-science, computer-vision, nlp, ...
+```
 
 ---
 
-## GPU/CPU 支持
+## 本地运行脚本
 
-### AI/机器学习项目
+### 环境要求
 
-本工具会智能检测您的硬件环境，提供相应的安装指导。
+- Python 3.8+
+- Git
 
-#### 检测您的硬件
+### 安装
 
-**Windows 系统：**
-```powershell
-# 右键点击"此电脑" → "管理" → "设备管理器" → "显示适配器"
-# 或在任务管理器中查看"性能" → "GPU"
+```bash
+pip install -r requirements.txt
 ```
 
-**macOS 系统：**
+### 配置 GitHub Token（可选）
+
+**提升 API 速率限制：** 60次/小时 → 5000次/小时
+
 ```bash
-system_profiler SPDisplaysDataType
-```
+# Linux/macOS
+export GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
 
-**Linux 系统：**
-```bash
-lspci | grep -i vga      # 查看显卡信息
-nvidia-smi              # 检查 NVIDIA 驱动（需要 CUDA 工具包）
-```
+# Windows (CMD)
+set GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 
-#### 性能对比
-
-| 任务 | CPU | GPU |
-|------|-----|-----|
-| 小模型推理 | 秒级 | 毫秒级 |
-| 大模型推理 | 分钟级 | 秒级 |
-| 训练模型 | 小时/天级 | 小时级 |
-| 图片生成 (SD) | 不可用 | 秒级 |
-
-**GPU 通常比 CPU 快 10-100 倍**
-
-#### 安装选项
-
-**CPU 版本**（无需 GPU）：
-```bash
-pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install tensorflow  # CPU 版本
-```
-
-**GPU 版本**（需要 NVIDIA 显卡）：
-```bash
-# 先安装 CUDA 工具包，然后：
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-pip install tensorflow[and-cuda]
+# Windows (PowerShell)
+$env:GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 ---
@@ -166,141 +197,46 @@ pip install tensorflow[and-cuda]
 ## 项目结构
 
 ```
-.
-├── README.md                                 # 本文档
-├── github-insight.skill                     # Claude Skill 包
-├── github-insight/
-│   ├── SKILL.md                              # 完整 Skill 文档
+github-insight-skill/
+├── README.md                      # 本文档
+├── github-insight.skill           # Claude Skill 安装包（可直接导入）
+├── github-insight/                # Skill 源码目录
+│   ├── SKILL.md                  # Skill 配置和完整说明
 │   ├── scripts/
-│   │   ├── get_github_repo.py               # 仓库分析脚本
-│   │   │   # 用法：python get_github_repo.py owner/repo
-│   │   └── get_trending_repos.py             # 获取热门仓库脚本
-│   │   # 用法：python get_trending_repos.py --language python --limit 3
+│   │   ├── get_github_repo.py    # 仓库分析脚本
+│   │   └── get_trending_repos.py # 热门推荐脚本
 │   └── references/
-│       └── github-usage-guide.md             # 完整的本地使用指南
-│           # 包含内容：
-│           # - Git 安装
-│           # - Python/Node.js 配置
-│           # - GPU/CPU 适配
-│           # - AI/Web/后端项目指南
-│           # - 云端 GPU 替代方案
-│           # - 常见问题解答
-└── requirements.txt                          # Python 依赖
+│       └── github-usage-guide.md  # 本地使用指南详
+└── requirements.txt              # Python 依赖
 ```
 
 ---
 
-## 配置
+## 依赖
 
-### GitHub Token（推荐设置）
-
-将 API 速率限制从 60 提升到 5000 次/小时：
-
-```bash
-# Linux/macOS
-export GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
-
-# Windows (命令提示符)
-set GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
-
-# Windows (PowerShell)
-$env:GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
 ```
-
-**生成 Token：** GitHub 设置 → 开发者设置 → Personal access tokens
-
-### 环境变量
-
-某些项目可能需要额外的配置：
-
-```bash
-# 从示例文件创建 .env
-cp .env.example .env
-
-# 常见变量：
-# API_KEY=your_api_key
-# DATABASE_URL=postgresql://...
-# SECRET_KEY=your_secret
+requests>=2.31.0          # HTTP 请求库
+beautifulsoup4>=4.12.0     # HTML 解析
+lxml>=5.0.0                # XML/HTML 解析器
 ```
 
 ---
 
-## 云端 GPU 替代方案
+## 注意事项
 
-当本地没有 GPU 或性能不足时，可以使用以下云端服务：
-
-| 服务 | 费用 | 特点 |
-|------|------|------|
-| **Google Colab** | 免费 | Tesla T4 GPU，约 12 小时会话限制 |
-| **Kaggle Notebooks** | 免费 | 每周 30 小时 GPU，集成数据集 |
-| **AutoDL** | 约 0.5-1 元/小时 | 国内网络，RTX 3090 |
-| **GCP** | 按量付费 | 新用户赠送 300 美元免费额度 |
-| **AWS** | 按量付费 | GPU 选择最丰富 |
-| **Azure** | 按量付费 | 企业级集成 |
-
-### 快速上手：Google Colab
-
-1. 访问 https://colab.research.google.com/
-2. 创建新笔记本
-3. 运行时 → 更改运行时类型 → GPU
-4. 开始使用 GPU 加速运行代码
-
-```python
-# 在 Colab 中安装依赖
-!pip install torch torchvision transformers
-```
-
----
-
-## 依赖要求
-
-### 核心依赖
-
-```
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-lxml>=5.0.0
-```
-
-### 可选依赖（高级功能）
-
-```
-# 高级 ML 工作流
-torch>=2.0.0
-tensorflow>=2.13.0
-transformers>=4.30.0
-
-# 开发测试
-pytest>=7.0.0
-pytest-cov>=4.0.0
-```
-
----
-
-## 常见问题
-
-| 问题 | 解决方案 |
-|------|----------|
-| API 速率限制 | 设置 `GITHUB_TOKEN` 环境变量 |
-| 下载速度慢 | 使用国内镜像源（清华、阿里云等） |
-| CUDA 版本不匹配 | 匹配 PyTorch/TensorFlow 与 CUDA 版本 |
-| 端口被占用 | 更换端口或终止占用进程 |
-| 权限不足 | 使用 `pip install --user` 或管理员权限 |
-
-### 获取帮助
-
-- 查看项目的 GitHub Issues
-- 参考 [github-usage-guide.md](github-insight/references/github-usage-guide.md)
-- 在 Stack Overflow 搜索类似问题
+- **速率限制**：GitHub 公共 API 限制 60次/小时，建议配置 Token
+- **仓库权限**：仅能访问公开仓库
+- **分析数量**：推荐时建议每次不超过 3 个仓库
+- **解读生成**：脚本负责获取数据，深度解读由 Claude 智能体生成
 
 ---
 
 ## License
 
-MIT License - 欢迎根据需要使用和修改。
+MIT
 
 ---
 
-## 贡献
+##贡献
 
-欢迎贡献！欢迎提交 Issues 或 Pull Requests。
+欢迎提交 Issues 和 Pull Requests！
