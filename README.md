@@ -206,7 +206,7 @@ github-insight-skill/
 │   │   ├── get_github_repo.py    # 仓库分析脚本
 │   │   └── get_trending_repos.py # 热门推荐脚本
 │   └── references/
-│       └── github-usage-guide.md  # 本地使用指南详
+│       └── github-usage-guide.md  # 本地使用指南详情
 └── requirements.txt              # Python 依赖
 ```
 
@@ -237,6 +237,7 @@ MIT
 
 ---
 
-##贡献
+## 贡献
 
 欢迎提交 Issues 和 Pull Requests！
+
